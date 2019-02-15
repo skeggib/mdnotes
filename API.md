@@ -25,7 +25,7 @@ Response:
 - `400 Bad Request`: invalid body content
 - `409 Conflict`: the username already exists
 
-### Delete an user
+### Delete an user
 
 `DELETE /users/<username>`
 
