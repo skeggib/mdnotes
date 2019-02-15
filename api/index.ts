@@ -30,7 +30,6 @@ app.use(bodyParser.json());
 app.get('/users', function (request, response) {
     User.findAll().then(function (value) {
         let result = [];
-        console.log(value);
         for (let val of value) {
             result.push(val);
         }
@@ -66,5 +65,7 @@ app.post('/users', function (req, res) {
     });
 }
 );
+
+app.delete('/users/:username', destroy(User));
 
 
