@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  db:
+    image: mdnotes_db
+    volumes: 
+      - notes_volume:/var/lib/postgres/data
+  api:
+    image: mdnotes_api
+    ports:
+      - 3000:3000
+
+volumes:
+  notes_volume:
