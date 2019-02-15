@@ -4,7 +4,9 @@ const bodyParser = require('body-parser');
 const app = express()
 const port = 3000
 
-const sequelize = new Sequelize('postgres://user:pass@skeggib.com:6543/notes');
+const config = require('config.json');
+
+const sequelize = new Sequelize(`postgres://${config.database.user}:${config.database.password}@${config.database.host}:${config.database.port}/${config.database.name}`);
 
 
 const User = sequelize.define('user', {
@@ -65,7 +67,5 @@ app.post('/users', function (req, res) {
     });
 }
 );
-
-app.delete('/users/:username', destroy(User));
 
 
