@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const app = express()
 const port = 3000
 
-const config = require('config.json');
+import * as config from '../config/config.json';
 
 const sequelize = new Sequelize(`postgres://${config.database.user}:${config.database.password}@${config.database.host}:${config.database.port}/${config.database.name}`);
 
