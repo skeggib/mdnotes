@@ -60,7 +60,7 @@ Response:
 - `201 Created`: the note was created
     ```json
     {
-        "id": <note_id>
+        "id": "<note_id>"
     }
     ```
 - `400 Bad Request`: invalid body content
@@ -78,7 +78,7 @@ Response:
 - `200 OK`
     ```json
     {
-        "id": <note_id>
+        "id": "<note_id>",
         "title": "<title>",
         "content": "<markdown>"
     }
