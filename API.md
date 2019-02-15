@@ -22,12 +22,34 @@ Body:
 Response:
 
 - `201 Created`: the user was created
+    ```json
+    { "id": "<id>" }
+    ```
 - `400 Bad Request`: invalid body content
 - `409 Conflict`: the username already exists
 
+### Update an user
+
+`PUT /users/<id>`
+
+Query parameters: none.
+
+Body:
+
+```json
+{
+    "name": "<username>"
+}
+```
+
+Response:
+
+- `200 OK`: the user was updated
+- `404 Not Found`: the user does not exists
+
 ### Delete an user
 
-`DELETE /users/<username>`
+`DELETE /users/<id>`
 
 Query parameters: none.
 
@@ -42,9 +64,11 @@ Response:
 
 ### Create a note
 
-`POST /<username>/notes`
+`POST /notes`
 
-Query parameters: none.
+Query parameters:
+
+- `user_id=<id>`
 
 Body:
 
@@ -59,15 +83,13 @@ Response:
 
 - `201 Created`: the note was created
     ```json
-    {
-        "id": "<note_id>"
-    }
+    { "id": "<id>" }
     ```
 - `400 Bad Request`: invalid body content
 
 ### Get a note
 
-`GET /<username>/notes/<id>`
+`GET /notes/<id>`
 
 Query parameters: none.
 
@@ -85,9 +107,24 @@ Response:
     ```
 - `404 Not Found`: the note does not exists
 
+### Get all notes
+
+`GET /notes`
+
+Query parameters:
+
+- `user_id=<id>` (optional)
+
+Body: none.
+
+Response:
+
+- `200 OK`, list of all notes in JSON format
+- `404 Not Found`: the user does not exists
+
 ### Edit a note
 
-`PUT /<username>/notes/<id>`
+`PUT /notes/<id>`
 
 Query parameters: none.
 
@@ -108,7 +145,7 @@ Response:
 
 ### Delete a note
 
-`PUT /<username>/notes/<id>`
+`PUT /notes/<id>`
 
 Query parameters: none.
 
