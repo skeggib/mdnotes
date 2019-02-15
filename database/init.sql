@@ -1,10 +1,11 @@
 CREATE TABLE users
 (
-    name VARCHAR(256),
+    id SERIAL,
+    name VARCHAR(256) NOT NULL,
     "createdAt" TIMESTAMP,
     "updatedAt" TIMESTAMP,
 
-    PRIMARY KEY (name)
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE notes
@@ -12,10 +13,10 @@ CREATE TABLE notes
     id SERIAL,
     title VARCHAR(4096) NOT NULL,
     content TEXT NOT NULL,
-    owner VARCHAR(256) NOT NULL,
+    owner INTEGER NOT NULL,
     "createdAt" TIMESTAMP,
     "updatedAt" TIMESTAMP,
 
     PRIMARY KEY (id),
-    FOREIGN KEY (owner) REFERENCES users(name)
+    FOREIGN KEY (owner) REFERENCES users(id)
 );
