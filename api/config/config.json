@@ -1,7 +1,7 @@
 {
     "database": {
-        "host": "db",
-        "port": 5432,
+        "host": "skeggib.com",
+        "port": 6543,
         "user": "user",
         "password": "pass",
         "name": "notes"

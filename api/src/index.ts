@@ -35,18 +35,18 @@ app.use(bodyParser.json());
 
 //-------------------------USER----------------------------------
 
-//Retourne tous les utilisateurs avec leur(s) note(s)
+//Retourne tous les users avec leur(s) note(s)
 app.get('/users', function (req, res) {
     User.findAll().then(function (value) {
         let result = [];
         for (let val of value) {
             result.push(val);
         }
-        res.json(result);
+        res.status(201).json(result);
     })
 });
 
-//Ajoute un utilisateur
+//Ajoute un user
 app.post('/users', function (req, res) {
         User.create({
             name: req.body.name
@@ -75,7 +75,7 @@ app.delete('/users/:id', function(req, res) {
     })
 });
 
-//Modifier le name du user avec l'id user_id
+//Modifie le name du user avec l'id user_id
 app.put('/users/:id', function(req, res) {
     let user_id = req.params.id;
 
@@ -106,6 +106,7 @@ app.get('/notes', function (req, res) {
     })
 });
 
+//Retourne la note du user avec id=note_id
 app.get('/notes/:id', function (req, res) {
     Note.findById(req.params.id).then(function (note) {
         if(note != null)
@@ -128,6 +129,38 @@ app.post('/notes', function (req, res) {
     }).catch(function () {
         res.status(404).end();
     });
+});
+
+//Modifie la note avec id=note_id
+app.put('/notes/:id', function (req, res) {
+    Note.findById(req.params.id).then(function (note) {
+        if(note != null)
+        {
+            note.title = req.body.title;
+            note.content = req.body.content;
+
+            note.save().then(function(note_update) {
+                res.status(200).json(note_update).end();
+            });
+        }else{
+            res.status(404).end();
+        }
+    })
+});
+
+//Supprime une note
+app.delete('/notes/:id', function(req, res) {
+    Note.findById(req.params.id).then(function (note) {
+        if(note != null)
+        {
+            note.destroy().then(function(){
+                res.status(200).end();
+            })
+        }else{
+            res.status(404).end();
+        }
+        
+    })
 });
 
 app.listen(port, function () {
