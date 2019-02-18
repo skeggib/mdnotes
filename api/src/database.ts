@@ -1,11 +1,11 @@
 import Sequelize from 'sequelize';
 import config from 'config';
 
-var host = config.get('dabatase.host');
-var port = config.get('dabatase.port');
-var user = config.get('dabatase.user');
-var password = config.get('dabatase.password');
-var name = config.get('dabatase.name');
+var host = config.get('database.host');
+var port = config.get('database.port');
+var user = config.get('database.user');
+var password = config.get('database.password');
+var name = config.get('database.name');
 
 export const dbConnexionString = 
     "postgres://" +
