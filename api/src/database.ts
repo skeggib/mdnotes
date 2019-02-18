@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import * as config from '../config/config.json';
+import { userInfo } from 'os';
 
 export const dbConnexionString = 
     "postgres://" +
@@ -9,7 +10,11 @@ export const dbConnexionString =
 
 export const sequelize = new Sequelize(dbConnexionString);
 
-export const User = sequelize.define('user', {
+export class UserModel {
+    name: String
+}
+
+export const User = sequelize.define<UserModel, {}>('user', {
     name: {
         type: Sequelize.STRING
     }
