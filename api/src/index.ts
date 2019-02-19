@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import {User} from './database';
-import {Note} from './database';
+import { User } from './database';
+import { Note } from './database';
 
 const app = express();
 const port = 3000;
@@ -22,13 +22,23 @@ app.get('/users', (request, response) => {
  * Adds an user.
  */
 app.post('/users', (request, response) => {
-    User.create({
-        name: request.body.name
-    }).then(value => {
-        response.status(201).json(value);
+    User.count({ where: { 'name': request.body.name } }).then(c => {
+        if (c == 0) {
+            User.create({
+                name: request.body.name
+            }).then(value => {
+                response.status(201).json(value);
+            }).catch(error => {
+                response.status(400).json({ "error": error });
+            });
+        }
+        else {
+            response.status(409).json({ "error": "Conflict" });
+        }
     }).catch(error => {
         response.status(400).json({ "error": error });
     });
+
 });
 
 
@@ -44,7 +54,7 @@ app.delete('/users/:id', (request, response) => {
         if (count > 0)
             response.end();
         else
-            response.status(404).end();
+            response.status(404).json({ "error": "Not found" });
     }).catch(error => {
         response.status(400).json({ "error": error });
     });
@@ -61,7 +71,7 @@ app.put('/users/:id', (request, response) => {
         if (count > 0)
             response.end();
         else
-            response.status(404).end();
+            response.status(404).json({ "error": "Not found" });
     }).catch(error => {
         response.status(400).json({ "error": error });
     });
@@ -69,26 +79,43 @@ app.put('/users/:id', (request, response) => {
 
 //Retourne toutes les notes
 app.get('/notes', function (req, res) {
-    Note.findAll().then(function (value) {
-        let result = [];
+    if (req.query.id != null) {
+        Note.findAll({ where: { owner: req.query.id } }).then(function (value) {
+            if (value != null) {
+                let result = [];
 
-        for (let val of value) {
-            result.push(val);
-        }
-        res.json(result);
-    })
+                for (let val of value) {
+                    result.push(val);
+                }
+                res.status(200).json(result);
+            }
+            else {
+                res.status(404).json({ "error": "Not found" });
+            }
+        });
+    }
+    else {
+        Note.findAll().then(function (value) {
+            let result = [];
+
+            for (let val of value) {
+                result.push(val);
+            }
+            res.status(200).json(result);
+        });
+    }
+
 });
 
 //Retourne la note du user avec id=note_id
 app.get('/notes/:id', function (req, res) {
     Note.findById(req.params.id).then(function (note) {
-        if(note != null)
-        {
-            res.status(200).json(note).end();
-        }else{
-            res.status(404).end();
+        if (note != null) {
+            res.status(200).json(note);
+        } else {
+            res.status(404).json({ "error": "Not found" });
         }
-    })
+    });
 });
 
 //Ajoute une note
@@ -98,42 +125,42 @@ app.post('/notes', function (req, res) {
         content: req.body.content,
         owner: req.query.user_id
     }).then(function (noteNew) {
-        res.status(200).json(noteNew).end();
-    }).catch(function () {
-        res.status(404).end();
+        res.status(201).json(noteNew).end();
+    }).catch(function (error) {
+        res.status(400).json({ "error": error });
     });
 });
 
 //Modifie la note avec id=note_id
 app.put('/notes/:id', function (req, res) {
     Note.findById(req.params.id).then((note: any) => {
-        if(note != null)
-        {
+        if (note != null) {
             note.title = req.body.title;
             note.content = req.body.content;
 
-            note.save().then(function(note_update) {
-                res.status(200).json(note_update).end();
+            note.save().then(function (note_update) {
+                res.status(200).json(note_update);
             });
-        }else{
-            res.status(404).end();
+        } else {
+            res.status(404).json({ "error": "Not found" });
         }
-    })
+    }).catch(function (error) {
+        res.status(400).json({ "error": error });
+    });
 });
 
 //Supprime une note
-app.delete('/notes/:id', function(req, res) {
+app.delete('/notes/:id', function (req, res) {
     Note.findById(req.params.id).then((note: any) => {
-        if(note != null)
-        {
-            note.destroy().then(function(){
+        if (note != null) {
+            note.destroy().then(function () {
                 res.status(200).end();
             })
-        }else{
-            res.status(404).end();
+        } else {
+            res.status(404).json({ "error": "Not found" });
         }
-        
-    })
+
+    });
 });
 
 app.listen(port, function () {

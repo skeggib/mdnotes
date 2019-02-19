@@ -23,10 +23,33 @@ Response:
 
 - `201 Created`: the user was created
     ```json
-    { "id": "<id>" }
+    {   "id": "<id>",
+        "name": "<name>",
+        "updatedAt": "<updatedAt>",
+        "createdAt": "<createdAt>" 
+    }
     ```
 - `400 Bad Request`: invalid body content
 - `409 Conflict`: the username already exists
+
+### Get an user
+
+`GET /users/`
+
+Query parameters: none.
+
+Body: none.
+
+Response:
+
+- `200 OK`
+    ```json
+    {   "id": "<id>",
+        "name": "<name>",
+        "updatedAt": "<updatedAt>",
+        "createdAt": "<createdAt>" 
+    }
+    ```
 
 ### Update an user
 
@@ -45,6 +68,7 @@ Body:
 Response:
 
 - `200 OK`: the user was updated
+- `400 Bad Request`: invalid body content
 - `404 Not Found`: the user does not exists
 
 ### Delete an user
@@ -58,6 +82,7 @@ Body: none.
 Response:
 
 - `200 OK`: the user was deleted
+- `400 Bad Request`: invalid param content
 - `404 Not Found`: the user does not exists
 
 ## Markdown notes
@@ -83,7 +108,13 @@ Response:
 
 - `201 Created`: the note was created
     ```json
-    { "id": "<id>" }
+    {   "id": "<id>",
+        "title": "<title>",
+        "content": "<content>",
+        "owner": "<owner>",
+        "updatedAt": "<updatedAt>",
+        "createdAt": "<createdAt>"
+    }
     ```
 - `400 Bad Request`: invalid body content
 
@@ -99,10 +130,12 @@ Response:
 
 - `200 OK`
     ```json
-    {
-        "id": "<note_id>",
+    {   "id": "<id>",
         "title": "<title>",
-        "content": "<markdown>"
+        "content": "<content>",
+        "owner": "<owner>",
+        "updatedAt": "<updatedAt>",
+        "createdAt": "<createdAt>"
     }
     ```
 - `404 Not Found`: the note does not exists
@@ -122,6 +155,7 @@ Response:
 - `200 OK`, list of all notes in JSON format
 - `404 Not Found`: the user does not exists
 
+
 ### Edit a note
 
 `PUT /notes/<id>`
@@ -140,6 +174,15 @@ Body:
 Response:
 
 - `200 OK`: the note was updated
+    ```json
+    {   "id": "<id>",
+        "title": "<title>",
+        "content": "<content>",
+        "owner": "<owner>",
+        "updatedAt": "<updatedAt>",
+        "createdAt": "<createdAt>"
+    }
+    ```
 - `400 Bad Request`: invalid body content
 - `404 Not Found`: the note does not exists
 
