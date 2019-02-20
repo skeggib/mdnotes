@@ -23,7 +23,8 @@ Response:
 
 - `201 Created`: the user was created
     ```json
-    {   "id": "<id>",
+    {   
+        "id": "<id>",
         "name": "<name>",
         "updatedAt": "<updatedAt>",
         "createdAt": "<createdAt>" 
@@ -34,7 +35,7 @@ Response:
 
 ### Get an user
 
-`GET /users/`
+`GET /users/<id>`
 
 Query parameters: none.
 
@@ -44,12 +45,14 @@ Response:
 
 - `200 OK`
     ```json
-    {   "id": "<id>",
+    {   
+        "id": "<id>",
         "name": "<name>",
         "updatedAt": "<updatedAt>",
         "createdAt": "<createdAt>" 
     }
     ```
+- `404 Not Found`: the user does not exist
 
 ### Update an user
 
@@ -69,7 +72,7 @@ Response:
 
 - `200 OK`: the user was updated
 - `400 Bad Request`: invalid body content
-- `404 Not Found`: the user does not exists
+- `404 Not Found`: the user does not exist
 
 ### Delete an user
 
@@ -82,8 +85,7 @@ Body: none.
 Response:
 
 - `200 OK`: the user was deleted
-- `400 Bad Request`: invalid param content
-- `404 Not Found`: the user does not exists
+- `404 Not Found`: the user does not exist
 
 ## Markdown notes
 
@@ -108,7 +110,8 @@ Response:
 
 - `201 Created`: the note was created
     ```json
-    {   "id": "<id>",
+    {   
+        "id": "<id>",
         "title": "<title>",
         "content": "<content>",
         "owner": "<owner>",
@@ -117,6 +120,7 @@ Response:
     }
     ```
 - `400 Bad Request`: invalid body content
+- `400 Bad Request`: `user_id` references a user that does not exist
 
 ### Get a note
 
@@ -130,7 +134,8 @@ Response:
 
 - `200 OK`
     ```json
-    {   "id": "<id>",
+    {   
+        "id": "<id>",
         "title": "<title>",
         "content": "<content>",
         "owner": "<owner>",
@@ -138,7 +143,7 @@ Response:
         "createdAt": "<createdAt>"
     }
     ```
-- `404 Not Found`: the note does not exists
+- `404 Not Found`: the note does not exist
 
 ### Get all notes
 
@@ -146,15 +151,21 @@ Response:
 
 Query parameters:
 
-- `user_id=<id>` (optional)
+- `user_id=<id>` (optional): filter notes by user
 
 Body: none.
 
 Response:
 
 - `200 OK`, list of all notes in JSON format
-- `404 Not Found`: the user does not exists
-
+    ```json
+    [
+        { /* note */ },
+        { /* note */ },
+        /* ... */
+    ]
+    ```
+- `400 Bad Request`: `user_id` references a user that does not exist
 
 ### Edit a note
 
@@ -174,21 +185,12 @@ Body:
 Response:
 
 - `200 OK`: the note was updated
-    ```json
-    {   "id": "<id>",
-        "title": "<title>",
-        "content": "<content>",
-        "owner": "<owner>",
-        "updatedAt": "<updatedAt>",
-        "createdAt": "<createdAt>"
-    }
-    ```
 - `400 Bad Request`: invalid body content
-- `404 Not Found`: the note does not exists
+- `404 Not Found`: the note does not exist
 
 ### Delete a note
 
-`PUT /notes/<id>`
+`DELETE /notes/<id>`
 
 Query parameters: none.
 
@@ -197,5 +199,4 @@ Body: none.
 Response:
 
 - `200 OK`: the note was deleted
-- `404 Not Found`: the note does not exists
-
+- `404 Not Found`: the note does not exist
