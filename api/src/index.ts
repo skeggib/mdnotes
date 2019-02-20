@@ -24,7 +24,7 @@ app.get('/users/:id', function (request, response) {
         if (user != null) {
             response.status(200).json(user);
         } else {
-            response.status(404).json({ "error": "Not found" });
+            response.status(400).json({ "error": "Not found" });
         }
     });
 });
@@ -89,19 +89,16 @@ app.put('/users/:id', (request, response) => {
 
 //Retourne toutes les notes
 app.get('/notes', function (req, res) {
-    if (req.query.id != null) {
-        Note.findAll({ where: { owner: req.query.id } }).then(function (value) {
-            if (value != null) {
-                let result = [];
+    if (req.query.user_id != null) {
+        Note.findAll({ where: { owner: req.query.user_id } }).then(function (value) {
+            let result = [];
 
-                for (let val of value) {
-                    result.push(val);
-                }
-                res.status(200).json(result);
+            for (let val of value) {
+                result.push(val);
             }
-            else {
-                res.status(404).json({ "error": "Not found" });
-            }
+            res.status(200).json(result);
+        }).catch(error => {
+            res.status(400).json({ "error": error });
         });
     }
     else {
@@ -112,7 +109,9 @@ app.get('/notes', function (req, res) {
                 result.push(val);
             }
             res.status(200).json(result);
-        });
+        }).catch(error => {
+            res.status(400).json({ "error": error });
+        });;
     }
 
 });

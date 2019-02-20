@@ -177,7 +177,6 @@ Response:
     ]
     ```
 - `400 Bad Request`: `user_id` references a user that does not exist
-- `404 Not Found`: the note does not exist
 
 ### Edit a note
 
