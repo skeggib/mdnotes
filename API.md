@@ -54,6 +54,16 @@ Response:
     ```
 - `404 Not Found`: the user does not exist
 
+### Get all users
+
+`GET /users`
+
+Query parameters: none.
+
+Body: none.
+
+- `200 OK`: a list of users in JSON format
+
 ### Update an user
 
 `PUT /users/<id>`
