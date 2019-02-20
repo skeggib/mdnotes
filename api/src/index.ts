@@ -18,6 +18,16 @@ app.get('/users', (request, response) => {
     });
 });
 
+//Retourne l user avec id=user_id
+app.get('/users/:id', function (request, response) {
+    User.findById(request.params.id).then(function (user) {
+        if (user != null) {
+            response.status(200).json(user);
+        } else {
+            response.status(404).json({ "error": "Not found" });
+        }
+    });
+});
 /**
  * Adds an user.
  */
