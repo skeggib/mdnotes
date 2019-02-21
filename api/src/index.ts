@@ -3,6 +3,9 @@ import bodyParser from 'body-parser';
 import { User } from './database';
 import { Note } from './database';
 import jwt from 'jsonwebtoken';
+var MarkdownIt = require('markdown-it'),
+    md = new MarkdownIt();
+
 const app = express();
 const port = 3000;
 const ProtectedRoutes = express.Router();
@@ -186,6 +189,18 @@ app.get('/api/notes/:id', function (req, res) {
     Note.findById(req.params.id).then(function (note) {
         if (note != null) {
             res.status(200).json(note);
+        } else {
+            res.status(404).json({ "error": "Not found" });
+        }
+    });
+});
+
+//Retourne la note du user avec id=note_id
+app.get('/api/notes/HTML/:id', function (req, res) {
+    Note.findById(req.params.id).then(function (note) {
+        if (note != null) {
+            var result = md.render(note['content']);
+            res.status(200).json(result);
         } else {
             res.status(404).json({ "error": "Not found" });
         }
