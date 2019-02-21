@@ -2,24 +2,89 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { User } from './database';
 import { Note } from './database';
-
+import jwt from 'jsonwebtoken';
 const app = express();
 const port = 3000;
+const ProtectedRoutes = express.Router();
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.set('Secret', "application_cd_dm_sk");
+
+app.use('/api', ProtectedRoutes);
+
+ProtectedRoutes.use((req, res, next) => {
+
+
+    // check header for the token
+    var token = req.headers['access-token'];
+
+    // decode token
+    if (token) {
+
+        // verifies secret and checks if the token is expired
+        jwt.verify(token, app.get('Secret'), (err, decoded) => {
+            if (err) {
+                return res.status(404).json({ message: 'invalid token' });
+            } else {
+                next();
+            }
+        });
+
+    } else {
+
+        // if there is no token  
+
+        res.send({
+
+            message: 'No token provided.'
+        });
+
+    }
+});
+
+app.post('/authenticate', (req, res) => {
+    User.count({ where: { 'name': req.body.name } }).then(c => {
+        if (c >= 1) {
+
+            const payload = {
+
+                check: true
+
+            };
+
+            var token = jwt.sign(payload, app.get('Secret'), {
+                expiresIn: 1440 // expires in 24 hours
+
+            });
+
+
+            res.json({
+                message: 'authentication done ',
+                token: token
+            });
+        } else {
+
+            res.status(404).json({ message: "user not found !" })
+
+        }
+
+    }).catch(error => {
+        res.status(400).json({ "error": error });
+    });
+});
 
 /**
  * Gets a list of all users.
  */
-app.get('/users', (request, response) => {
+app.get('/api/users', (request, response) => {
     User.findAll().then(users => {
         response.json(users);
     });
 });
 
 //Retourne l user avec id=user_id
-app.get('/users/:id', function (request, response) {
+app.get('/api/users/:id', function (request, response) {
     User.findById(request.params.id).then(function (user) {
         if (user != null) {
             response.status(200).json(user);
@@ -31,7 +96,7 @@ app.get('/users/:id', function (request, response) {
 /**
  * Adds an user.
  */
-app.post('/users', (request, response) => {
+app.post('/api/users', (request, response) => {
     User.count({ where: { 'name': request.body.name } }).then(c => {
         if (c == 0) {
             User.create({
@@ -55,7 +120,7 @@ app.post('/users', (request, response) => {
 /**
  * Deletes an user by ID.
  */
-app.delete('/users/:id', (request, response) => {
+app.delete('/api/users/:id', (request, response) => {
     User.destroy({
         "where": {
             "id": request.params.id
@@ -73,7 +138,7 @@ app.delete('/users/:id', (request, response) => {
 /**
  * Updates an user by ID.
  */
-app.put('/users/:id', (request, response) => {
+app.put('/api/users/:id', (request, response) => {
     User.update(request.body, {
         where: { id: request.params.id }
     }).then(result => {
@@ -88,7 +153,7 @@ app.put('/users/:id', (request, response) => {
 });
 
 //Retourne toutes les notes
-app.get('/notes', function (req, res) {
+app.get('/api/notes', function (req, res) {
     if (req.query.user_id != null) {
         Note.findAll({ where: { owner: req.query.user_id } }).then(function (value) {
             let result = [];
@@ -117,7 +182,7 @@ app.get('/notes', function (req, res) {
 });
 
 //Retourne la note du user avec id=note_id
-app.get('/notes/:id', function (req, res) {
+app.get('/api/notes/:id', function (req, res) {
     Note.findById(req.params.id).then(function (note) {
         if (note != null) {
             res.status(200).json(note);
@@ -128,7 +193,7 @@ app.get('/notes/:id', function (req, res) {
 });
 
 //Ajoute une note
-app.post('/notes', function (req, res) {
+app.post('/api/notes', function (req, res) {
     Note.create({
         title: req.body.title,
         content: req.body.content,
@@ -141,7 +206,7 @@ app.post('/notes', function (req, res) {
 });
 
 //Modifie la note avec id=note_id
-app.put('/notes/:id', function (req, res) {
+app.put('/api/notes/:id', function (req, res) {
     Note.findById(req.params.id).then((note: any) => {
         if (note != null) {
             note.title = req.body.title;
@@ -159,7 +224,7 @@ app.put('/notes/:id', function (req, res) {
 });
 
 //Supprime une note
-app.delete('/notes/:id', function (req, res) {
+app.delete('/api/notes/:id', function (req, res) {
     Note.findById(req.params.id).then((note: any) => {
         if (note != null) {
             note.destroy().then(function () {
