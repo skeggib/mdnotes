@@ -15,7 +15,7 @@ namespace MdNotes.Tests
         {
             var name = Utils.GetUniqueString();
             var response = new HttpClient().Post(
-                $"{Utils.BaseUri}users", 
+                $"{Utils.BaseUri}users",
                 new JsonContent($"{{\"name\": \"{name}\"}}"));
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             var json = await response.Content.ReadAsStringAsync();
@@ -25,27 +25,28 @@ namespace MdNotes.Tests
         }
 
         [Fact]
-        public async Task InvalidBodyDataGives400()
+        public void InvalidBodyDataGives400()
         {
-            var response = await new HttpClient().PostAsync(
-                $"{Utils.BaseUri}users", 
+            var response = new HttpClient().Post(
+                $"{Utils.BaseUri}users",
                 new JsonContent($"{{\"invalid\": \"test\"}}"));
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task SameUserNameGives409()
-        {
-            var name = Utils.GetUniqueString();
-            var response = await new HttpClient().PostAsync(
-                $"{Utils.BaseUri}users", 
-                new JsonContent($"{{\"name\": \"{name}\"}}"));
-            var json = await response.Content.ReadAsStringAsync();
-            var user = JsonConvert.DeserializeObject<UserKey>(json);
-            var responseConflict = await new HttpClient().PostAsync(
-                $"{Utils.BaseUri}users", 
-                new JsonContent($"{{\"name\": \"{name}\"}}"));
-            Assert.Equal(HttpStatusCode.Conflict, responseConflict.StatusCode);
-        }
+
+        // [Fact]
+        // public async Task SameUserNameGives409()
+        // {
+        //     var name = Utils.GetUniqueString();
+        //     var response = await new HttpClient().PostAsync(
+        //         $"{Utils.BaseUri}users",
+        //         new JsonContent($"{{\"name\": \"{name}\"}}"));
+        //     var json = await response.Content.ReadAsStringAsync();
+        //     var user = JsonConvert.DeserializeObject<UserKey>(json);
+        //     var responseConflict = await new HttpClient().PostAsync(
+        //         $"{Utils.BaseUri}users",
+        //         new JsonContent($"{{\"name\": \"{name}\"}}"));
+        //     Assert.Equal(HttpStatusCode.Conflict, responseConflict.StatusCode);
+        // }
     }
 }
