@@ -9,56 +9,56 @@ namespace MdNotes.Tests
 {
     public class UserGetTests
     {
-        // [Fact]
-        // public async Task CanGetUser()
-        // {
-        //     var name = Utils.GetUniqueString();
-        //     var responseCreate = await new HttpClient().PostAsync(
-        //         $"{Utils.BaseUri}users", 
-        //         new JsonContent($"{{\"name\": \"{name}\"}}"));
-        //     var id = JsonConvert.DeserializeObject<User>(
-        //         await responseCreate.Content.ReadAsStringAsync()
-        //     ).Id;
+        [Fact]
+        public async Task CanGetUser()
+        {
+            var name = Utils.GetUniqueString();
+            var responseCreate = new HttpClient().Post(
+                $"{Utils.BaseUri}users",
+                new JsonContent($"{{\"name\": \"{name}\"}}"));
+            var json = await responseCreate.Content.ReadAsStringAsync();
+            var userKey = JsonConvert.DeserializeObject<UserKey>(json);
 
-        //     var responseGet = await new HttpClient().GetAsync(
-        //         $"{Utils.BaseUri}users/{id}");
-        //     var json = await responseGet.Content.ReadAsStringAsync();
-        //     var userGet = JsonConvert.DeserializeObject<User>(json);
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{Utils.BaseUri}users/{userKey.User.Id}");
+            request.Headers.Add("Authorization", $"Bearer {userKey.DefaultKey}");
+            var responseGet = new HttpClient().Send(request);
+            var json2 = await responseGet.Content.ReadAsStringAsync();
+            var userGet = JsonConvert.DeserializeObject<User>(json2);
 
-        //     Assert.Equal(name, userGet.Name);
-        // }
+            Assert.Equal(name, userGet.Name);
+        }
 
-        // [Fact]
-        // public async Task CanGetAllUsers()
-        // {
-        //     var responseCreate1 = await new HttpClient().PostAsync(
-        //         $"{Utils.BaseUri}users",
-        //         new JsonContent($"{{\"name\": \"{Utils.GetUniqueString()}\"}}"));
-        //     var user1 = JsonConvert.DeserializeObject<User>(
-        //         await responseCreate1.Content.ReadAsStringAsync());
+        [Fact]
+        public async Task CanGetAllUsers()
+        {
+            var responseCreate1 = new HttpClient().Post(
+                $"{Utils.BaseUri}users",
+                new JsonContent($"{{\"name\": \"{Utils.GetUniqueString()}\"}}"));
+            var user1 = JsonConvert.DeserializeObject<UserKey>(
+                await responseCreate1.Content.ReadAsStringAsync());
 
-        //     var responseCreate2 = await new HttpClient().PostAsync(
-        //         $"{Utils.BaseUri}users",
-        //         new JsonContent($"{{\"name\": \"{Utils.GetUniqueString()}\"}}"));
-        //     var user2 = JsonConvert.DeserializeObject<User>(
-        //         await responseCreate1.Content.ReadAsStringAsync());
+            var responseCreate2 = new HttpClient().Post(
+                $"{Utils.BaseUri}users",
+                new JsonContent($"{{\"name\": \"{Utils.GetUniqueString()}\"}}"));
+            var user2 = JsonConvert.DeserializeObject<UserKey>(
+                await responseCreate2.Content.ReadAsStringAsync());
 
-        //     var responseGet = await new HttpClient().GetAsync($"{Utils.BaseUri}users");
-        //     var users = JsonConvert.DeserializeObject<User[]>(
-        //         await responseGet.Content.ReadAsStringAsync());
+            var responseGet = new HttpClient().Get($"{Utils.BaseUri}users");
+            var users = JsonConvert.DeserializeObject<User[]>(
+                await responseGet.Content.ReadAsStringAsync());
 
-        //     Assert.True(users.Where(user => user.Id == user1.Id).Count() == 1);
-        //     Assert.True(users.Where(user => user.Id == user2.Id).Count() == 1);
-        //     Assert.Equal(user1.Name, users.Where(user => user.Id == user1.Id).First().Name);
-        //     Assert.Equal(user2.Name, users.Where(user => user.Id == user2.Id).First().Name);
-        // }
+            Assert.True(users.Where(user => user.Id == user1.User.Id).Count() == 1);
+            Assert.True(users.Where(user => user.Id == user2.User.Id).Count() == 1);
+            Assert.Equal(user1.User.Name, users.Where(user => user.Id == user1.User.Id).First().Name);
+            Assert.Equal(user2.User.Name, users.Where(user => user.Id == user2.User.Id).First().Name);
+        }
 
-        // [Fact]
-        // public async Task GetingNonExistingUserGives404()
-        // {
-        //     var response = await new HttpClient().GetAsync(
-        //         $"{Utils.BaseUri}users/9999");
-        //     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        // }
+        [Fact]
+        public void GetingNonExistingUserGives404()
+        {
+            var response = new HttpClient().Get(
+                $"{Utils.BaseUri}users/9999");
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
     }
 }
