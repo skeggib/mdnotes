@@ -30,5 +30,5 @@ CREATE TABLE keys
     "updatedAt" TIMESTAMP,
 
     PRIMARY KEY (id),
-    FOREIGN KEY (owner) REFERENCES users(id)
+    FOREIGN KEY (owner) REFERENCES users(id) ON DELETE CASCADE
 );
