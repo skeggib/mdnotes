@@ -97,7 +97,9 @@ app.put('/users/:id', (request, response) => {
     });
 });
 
-//Retourne toutes les notes
+/**
+ * Returns all notes (filtered by user if user_id is set).
+ */
 app.get('/notes', function (req, res) {
     if (req.query.user_id != null) {
         Note.findAll({ where: { owner: req.query.user_id } }).then(function (value) {
@@ -173,7 +175,9 @@ app.post('/notes', function (req, res) {
     });
 });
 
-//Modifie la note avec id=note_id
+/**
+ * Updates a note.
+ */
 app.put('/notes/:id', function (req, res) {
     Note.findById(req.params.id).then((note: any) => {
         if (note != null) {
@@ -191,7 +195,9 @@ app.put('/notes/:id', function (req, res) {
     });
 });
 
-//Supprime une note
+/**
+ * Deletes a note.
+ */
 app.delete('/notes/:id', function (req, res) {
     Note.findById(req.params.id).then((note: any) => {
         if (note != null) {
