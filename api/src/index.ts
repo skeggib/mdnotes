@@ -14,28 +14,27 @@ md.use(MarkdownItMath);
 
 const app = express();
 const port = 3000;
-const ProtectedRoutes = express.Router();
 
-app.use(bearerToken());
-app.use('/notes', ProtectedRoutes);
-ProtectedRoutes.use((request: any, response, next) => {
+function authorizationMiddleware(request: any, response, next) {
 
     var token = request.token;
     if (token) {
         Key.find({
             where: { key: token }
         }).then((token: any) => {
-            if (token == null)
-                response.status(401).json({ "error": "Invalid access-token provided." });
-            else {
+            if (token != null)
                 response.locals.userId = token.owner;
-                next();
-            }
+            next();
+        }).catch(error => {
+            response.status(500).json({ "error": error });
         });
     } else {
-        response.status(400).json({ "error": "No access-token provided." });
+        next();
     }
-});
+}
+
+app.use(bearerToken());
+app.use(authorizationMiddleware);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -98,18 +97,26 @@ app.post('/users', (request, response) => {
 /**
  * Deletes an user by ID.
  */
-app.delete('/users/:id', (request, response) => {
-    User.destroy({
-        "where": {
-            "id": request.params.id
+app.delete('/users/:id', authorizationMiddleware, (request, response) => {
+    User.findById(request.params.id).then(user => {
+        if (user == null) {
+            response.status(404).end();
+        } else {
+            if (request.params.id != response.locals.userId) {
+                response.status(401).end();
+                return;
+            }
+        
+            User.destroy({
+                "where": {
+                    "id": request.params.id
+                }
+            }).then(count => {
+                response.end();
+            }).catch(error => {
+                response.status(500).json({ "error": error });
+            });
         }
-    }).then(count => {
-        if (count > 0)
-            response.end();
-        else
-            response.status(404).json({ "error": "Not found" });
-    }).catch(error => {
-        response.status(500).json({ "error": error });
     });
 });
 
@@ -117,6 +124,10 @@ app.delete('/users/:id', (request, response) => {
  * Updates an user by ID.
  */
 app.put('/users/:id', (request, response) => {
+    if (request.params.id != response.locals.userId) {
+        response.status(401).end();
+        return;
+    }
     if (request.body.name == null) {
         response.status(400).json({ "error": "Invalid request body content." });
         return;
@@ -139,6 +150,11 @@ app.put('/users/:id', (request, response) => {
  * Returns all notes of the user.
  */
 app.get('/notes', function (req, res) {
+    if (req.params.id != res.locals.userId) {
+        res.status(401).end();
+        return;
+    }
+
     Note.findAll({ where: { owner: res.locals.userId } }).then(function (value) {
         let result = [];
         for (let val of value) {

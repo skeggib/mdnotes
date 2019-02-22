@@ -20,7 +20,8 @@
     },
     "devDependencies": {
         "@types/body-parser": "^1.17.0",
-        "@types/express": "^4.16.1"
+        "@types/express": "^4.16.1",
+        "@types/markdown-it": "0.0.7"
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
