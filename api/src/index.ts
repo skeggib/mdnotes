@@ -6,6 +6,12 @@ import { Key } from './database';
 import crypto from 'crypto';
 import bearerToken from 'express-bearer-token'
 
+import MarkdownIt from 'markdown-it';
+import MarkdownItMath from 'markdown-it-math';
+
+const md = MarkdownIt();
+md.use(MarkdownItMath);
+
 const app = express();
 const port = 3000;
 const ProtectedRoutes = express.Router();
@@ -159,6 +165,25 @@ app.get('/notes/:id', function (req, res) {
             res.status(404).end();
     }).catch(error => {
         res.status(500).json({ "error": error });
+    });
+});
+
+/**
+ * Gets a rendered note.
+ */
+app.get('/notes/:id/html', function (req, res) {
+    Note.findById(req.params.id).then((note: any) => {
+        if (note != null) {
+            if (note.owner != res.locals.userId)
+                res.status(401).end();
+            else {
+                var html = md.render(note.content);
+                res.status(200).send(html);
+            }
+            
+        } else {
+            res.status(404).json({ "error": "Not found" });
+        }
     });
 });
 
