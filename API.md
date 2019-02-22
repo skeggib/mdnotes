@@ -169,13 +169,6 @@ Headers:
 Response:
 
 - `200 OK`, list of all notes in JSON format
-    ```json
-    [
-        { /* note */ },
-        { /* note */ },
-        /* ... */
-    ]
-    ```
 - `400 Bad Request`: missing API key
 - `401 Unauthorized`: invalid API key
 
