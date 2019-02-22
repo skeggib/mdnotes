@@ -4,10 +4,11 @@ import { User } from './database';
 import { Note } from './database';
 import { Key } from './database';
 import crypto from 'crypto';
-import bearerToken from 'express-bearer-token'
+import bearerToken from 'express-bearer-token';
 
 import MarkdownIt from 'markdown-it';
 import MarkdownItMath from 'markdown-it-math';
+import { Authorization } from './Authorization';
 
 const md = MarkdownIt();
 md.use(MarkdownItMath);
@@ -15,26 +16,8 @@ md.use(MarkdownItMath);
 const app = express();
 const port = 3000;
 
-function authorizationMiddleware(request: any, response, next) {
-
-    var token = request.token;
-    if (token) {
-        Key.find({
-            where: { key: token }
-        }).then((token: any) => {
-            if (token != null)
-                response.locals.userId = token.owner;
-            next();
-        }).catch(error => {
-            response.status(500).json({ "error": error });
-        });
-    } else {
-        next();
-    }
-}
-
 app.use(bearerToken());
-app.use(authorizationMiddleware);
+app.use(Authorization);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -97,7 +80,7 @@ app.post('/users', (request, response) => {
 /**
  * Deletes an user by ID.
  */
-app.delete('/users/:id', authorizationMiddleware, (request, response) => {
+app.delete('/users/:id', (request, response) => {
     User.findById(request.params.id).then(user => {
         if (user == null) {
             response.status(404).end();
