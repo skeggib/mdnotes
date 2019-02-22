@@ -10,6 +10,14 @@
                 "${workspaceFolder}/tests/MdNotes.Tests/MdNotes.Tests.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "buildApi",
+            "type": "typescript",
+            "tsconfig": "api\\tsconfig.json",
+            "problemMatcher": [
+                "$tsc"
+            ]
         }
     ]
 }

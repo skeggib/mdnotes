@@ -9,8 +9,6 @@ markdown documents.
 
 `POST /users`
 
-Query parameters: none.
-
 Body:
 
 ```json
@@ -24,10 +22,13 @@ Response:
 - `201 Created`: the user was created
     ```json
     {   
-        "id": "<id>",
-        "name": "<name>",
-        "updatedAt": "<updatedAt>",
-        "createdAt": "<createdAt>" 
+        "user": {
+            "id": "<id>",
+            "name": "<name>",
+            "updatedAt": "<updatedAt>",
+            "createdAt": "<createdAt>"
+        },
+        "defaultKey": "<defaultApiKey>"
     }
     ```
 - `400 Bad Request`: invalid body content
@@ -36,10 +37,6 @@ Response:
 ### Get an user
 
 `GET /users/<id>`
-
-Query parameters: none.
-
-Body: none.
 
 Response:
 
@@ -58,17 +55,15 @@ Response:
 
 `GET /users`
 
-Query parameters: none.
-
-Body: none.
-
 - `200 OK`: a list of users in JSON format
 
 ### Update an user
 
 `PUT /users/<id>`
 
-Query parameters: none.
+Headers:
+
+- `Authorization: Bearer <apiKey>`
 
 Body:
 
@@ -82,19 +77,23 @@ Response:
 
 - `200 OK`: the user was updated
 - `400 Bad Request`: invalid body content
+- `400 Bad Request`: missing API key
+- `401 Unauthorized`: invalid API key
 - `404 Not Found`: the user does not exist
 
 ### Delete an user
 
 `DELETE /users/<id>`
 
-Query parameters: none.
+Headers:
 
-Body: none.
+- `Authorization: Bearer <apiKey>`
 
 Response:
 
 - `200 OK`: the user was deleted
+- `400 Bad Request`: missing API key
+- `401 Unauthorized`: invalid API key
 - `404 Not Found`: the user does not exist
 
 ## Markdown notes
@@ -103,9 +102,9 @@ Response:
 
 `POST /notes`
 
-Query parameters:
+Headers:
 
-- `user_id=<id>`
+- `Authorization: Bearer <apiKey>`
 
 Body:
 
@@ -130,16 +129,17 @@ Response:
     }
     ```
 - `400 Bad Request`: invalid body content
-- `400 Bad Request`: `user_id` references a user that does not exist
+- `400 Bad Request`: missing API key
+- `401 Unauthorized`: invalid API key
 
 
 ### Get a note
 
 `GET /notes/<id>`
 
-Query parameters: none.
+Headers:
 
-Body: none.
+- `Authorization: Bearer <apiKey>`
 
 Response:
 
@@ -154,17 +154,17 @@ Response:
         "createdAt": "<createdAt>"
     }
     ```
+- `400 Bad Request`: missing API key
+- `401 Unauthorized`: invalid API key
 - `404 Not Found`: the note does not exist
 
 ### Get all notes
 
 `GET /notes`
 
-Query parameters:
+Headers:
 
-- `user_id=<id>` (optional): filter notes by user
-
-Body: none.
+- `Authorization: Bearer <apiKey>`
 
 Response:
 
@@ -176,13 +176,16 @@ Response:
         /* ... */
     ]
     ```
-- `400 Bad Request`: `user_id` references a user that does not exist
+- `400 Bad Request`: missing API key
+- `401 Unauthorized`: invalid API key
 
 ### Edit a note
 
 `PUT /notes/<id>`
 
-Query parameters: none.
+Headers:
+
+- `Authorization: Bearer <apiKey>`
 
 Body:
 
@@ -197,17 +200,21 @@ Response:
 
 - `200 OK`: the note was updated
 - `400 Bad Request`: invalid body content
+- `400 Bad Request`: missing API key
+- `401 Unauthorized`: invalid API key
 - `404 Not Found`: the note does not exist
 
 ### Delete a note
 
 `DELETE /notes/<id>`
 
-Query parameters: none.
+Headers:
 
-Body: none.
+- `Authorization: Bearer <apiKey>`
 
 Response:
 
 - `200 OK`: the note was deleted
+- `400 Bad Request`: missing API key
+- `401 Unauthorized`: invalid API key
 - `404 Not Found`: the note does not exist
