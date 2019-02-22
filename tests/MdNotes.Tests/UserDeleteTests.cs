@@ -45,7 +45,7 @@ namespace MdNotes.Tests
         }
 
         [Fact]
-        public async Task DeletingWithoutTokenGives401()
+        public async Task DeletingWithoutValidTokenGives401()
         {
             var name = Utils.GetUniqueString();
             var responseDelete = new HttpClient().Post(
