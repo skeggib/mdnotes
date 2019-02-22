@@ -36,3 +36,12 @@ export const Note = sequelize.define('note', {
         type: Sequelize.INTEGER
     }
 });
+
+export const Key = sequelize.define('key', {
+    key: {
+        type: Sequelize.STRING
+    },
+    owner: {
+        type: Sequelize.INTEGER
+    }
+});
