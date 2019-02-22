@@ -5,16 +5,17 @@
     "main": "dist/index.js",
     "dependencies": {
         "@types/config": "0.0.34",
+        "@types/jsonwebtoken": "^8.3.0",
         "body-parser": "^1.18.3",
         "config": "^3.0.1",
         "express": "^4.16.4",
+        "jsonwebtoken": "^8.5.0",
         "pg": "^7.8.0",
         "pg-hstore": "^2.3.2",
         "reflect-metadata": "^0.1.13",
         "sequelize": "^4.42.0",
         "sequelize-typescript": "^0.6.7",
-        "typescript": "^3.3.3",
-        "jsonwebtoken": "^8.5.0"
+        "typescript": "^3.3.3"
     },
     "devDependencies": {
         "@types/body-parser": "^1.17.0",

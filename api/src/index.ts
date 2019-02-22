@@ -83,20 +83,27 @@ app.get('/api/users', (request, response) => {
     });
 });
 
-//Retourne l user avec id=user_id
-app.get('/api/users/:id', function (request, response) {
+/**
+ * Gets an user by ID.
+ */
+app.get('/users/:id', function (request, response) {
     User.findById(request.params.id).then(function (user) {
-        if (user != null) {
+        if (user != null)
             response.status(200).json(user);
-        } else {
-            response.status(400).json({ "error": "Not found" });
-        }
+        else
+            response.status(404).end();
     });
 });
+
 /**
  * Adds an user.
  */
-app.post('/api/users', (request, response) => {
+app.post('/users', (request, response) => {
+    if (request.body.name == null) {
+        response.status(400).json({ "error": "Invalid request body content. "});
+        return;
+    }
+
     User.count({ where: { 'name': request.body.name } }).then(c => {
         if (c == 0) {
             User.create({
@@ -104,23 +111,22 @@ app.post('/api/users', (request, response) => {
             }).then(value => {
                 response.status(201).json(value);
             }).catch(error => {
-                response.status(400).json({ "error": error });
+                response.status(500).json({ "error": error });
             });
         }
         else {
             response.status(409).json({ "error": "Conflict" });
         }
     }).catch(error => {
-        response.status(400).json({ "error": error });
+        response.status(500).json({ "error": error });
     });
-
 });
 
 
 /**
  * Deletes an user by ID.
  */
-app.delete('/api/users/:id', (request, response) => {
+app.delete('/users/:id', (request, response) => {
     User.destroy({
         "where": {
             "id": request.params.id
@@ -131,14 +137,19 @@ app.delete('/api/users/:id', (request, response) => {
         else
             response.status(404).json({ "error": "Not found" });
     }).catch(error => {
-        response.status(400).json({ "error": error });
+        response.status(500).json({ "error": error });
     });
 });
 
 /**
  * Updates an user by ID.
  */
-app.put('/api/users/:id', (request, response) => {
+app.put('/users/:id', (request, response) => {
+    if (request.body.name == null) {
+        response.status(400).json({ "error": "Invalid request body content." });
+        return;
+    }
+
     User.update(request.body, {
         where: { id: request.params.id }
     }).then(result => {
@@ -148,12 +159,14 @@ app.put('/api/users/:id', (request, response) => {
         else
             response.status(404).json({ "error": "Not found" });
     }).catch(error => {
-        response.status(400).json({ "error": error });
+        response.status(500).json({ "error": error });
     });
 });
 
-//Retourne toutes les notes
-app.get('/api/notes', function (req, res) {
+/**
+ * Returns all notes (filtered by user if user_id is set).
+ */
+app.get('/notes', function (req, res) {
     if (req.query.user_id != null) {
         Note.findAll({ where: { owner: req.query.user_id } }).then(function (value) {
             let result = [];
@@ -163,7 +176,7 @@ app.get('/api/notes', function (req, res) {
             }
             res.status(200).json(result);
         }).catch(error => {
-            res.status(400).json({ "error": error });
+            res.status(500).json({ "error": error });
         });
     }
     else {
@@ -175,56 +188,83 @@ app.get('/api/notes', function (req, res) {
             }
             res.status(200).json(result);
         }).catch(error => {
-            res.status(400).json({ "error": error });
+            res.status(500).json({ "error": error });
         });;
     }
 
 });
 
-//Retourne la note du user avec id=note_id
-app.get('/api/notes/:id', function (req, res) {
-    Note.findById(req.params.id).then(function (note) {
-        if (note != null) {
+/**
+ * Gets a note.
+ */
+app.get('/notes/:id', function (req, res) {
+    Note.findById(req.params.id).then(note => {
+        if (note != null)
             res.status(200).json(note);
-        } else {
+        else
             res.status(404).json({ "error": "Not found" });
+    }).catch(error => {
+        res.status(500).json({ "error": error });
+    });
+});
+
+/**
+ * Creates a note.
+ */
+app.post('/notes', function (req, res) {
+    if (req.body.title == null || req.body.content == null) {
+        res.status(400).json({ "error": "Invalid request body content. "});
+        return;
+    }
+
+    if (req.query.user_id == null) {
+        res.status(400).json({ "error": "Missing parameter 'user_id'. "});
+        return;
+    }
+    
+    User.findById(req.query.user_id).then(user => {
+        if (user == null)
+            res.status(400).json({ "error": "The user_id parameter references a user that does not exists." });
+        else {
+            Note.create({
+                title: req.body.title,
+                content: req.body.content,
+                owner: req.query.user_id
+            }).then(function (noteNew) {
+                res.status(201).json(noteNew).end();
+            }).catch(function (error) {
+                res.status(500).json({ "error": error });
+            });
         }
+    }).catch(error => {
+        res.status(500).json({ "error": error });
     });
 });
 
-//Ajoute une note
-app.post('/api/notes', function (req, res) {
-    Note.create({
-        title: req.body.title,
-        content: req.body.content,
-        owner: req.query.user_id
-    }).then(function (noteNew) {
-        res.status(201).json(noteNew).end();
-    }).catch(function (error) {
-        res.status(400).json({ "error": error });
-    });
-});
-
-//Modifie la note avec id=note_id
-app.put('/api/notes/:id', function (req, res) {
+/**
+ * Updates a note.
+ */
+app.put('/notes/:id', function (req, res) {
     Note.findById(req.params.id).then((note: any) => {
         if (note != null) {
             note.title = req.body.title;
             note.content = req.body.content;
 
-            note.save().then(function (note_update) {
-                res.status(200).json(note_update);
+            note.save().then(updatedNote => {
+                res.status(200).json(updatedNote);
             });
         } else {
             res.status(404).json({ "error": "Not found" });
         }
-    }).catch(function (error) {
-        res.status(400).json({ "error": error });
+    }).catch(error => {
+        res.status(500).json({ "error": error });
     });
 });
 
-//Supprime une note
-app.delete('/api/notes/:id', function (req, res) {
+/**
+ * Deletes a note.
+ */
+app.delete('/notes/:id', function (req, res) {
     Note.findById(req.params.id).then((note: any) => {
         if (note != null) {
             note.destroy().then(function () {
