@@ -3,8 +3,8 @@ import bodyParser from 'body-parser';
 import { User } from './database';
 import { Note } from './database';
 import jwt from 'jsonwebtoken';
-var MarkdownIt = require('markdown-it'),
-    md = new MarkdownIt();
+var md = require('markdown-it')()
+    .use(require('markdown-it-math'));
 
 const app = express();
 const port = 3000;
@@ -99,7 +99,7 @@ app.get('/api/users/:id', function (request, response) {
 /**
  * Adds an user.
  */
-app.post('/api/users', (request, response) => {
+app.post('/users', (request, response) => {
     User.count({ where: { 'name': request.body.name } }).then(c => {
         if (c == 0) {
             User.create({

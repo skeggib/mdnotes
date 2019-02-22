@@ -10,6 +10,7 @@
         "express": "^4.16.4",
         "jsonwebtoken": "^8.5.0",
         "markdown-it": "^8.4.2",
+        "markdown-it-math": "^4.1.0",
         "pg": "^7.8.0",
         "pg-hstore": "^2.3.2",
         "reflect-metadata": "^0.1.13",
