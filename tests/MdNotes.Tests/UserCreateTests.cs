@@ -19,8 +19,9 @@ namespace MdNotes.Tests
                 new JsonContent($"{{\"name\": \"{name}\"}}"));
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             var json = await response.Content.ReadAsStringAsync();
-            var user = JsonConvert.DeserializeObject<User>(json);
-            Assert.True(user.Id >= 0);
+            var user = JsonConvert.DeserializeObject<UserKey>(json);
+            Assert.True(user.User.Id >= 0);
+            Assert.True(user.DefaultKey.Length >= 0);
         }
 
         [Fact]
@@ -40,7 +41,7 @@ namespace MdNotes.Tests
                 $"{Utils.BaseUri}users", 
                 new JsonContent($"{{\"name\": \"{name}\"}}"));
             var json = await response.Content.ReadAsStringAsync();
-            var user = JsonConvert.DeserializeObject<User>(json);
+            var user = JsonConvert.DeserializeObject<UserKey>(json);
             var responseConflict = await new HttpClient().PostAsync(
                 $"{Utils.BaseUri}users", 
                 new JsonContent($"{{\"name\": \"{name}\"}}"));

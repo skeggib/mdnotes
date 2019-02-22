@@ -21,16 +21,13 @@ namespace MdNotes.Tests
         [Fact]
         public async Task CanCreateNote()
         {
-            var responseCreate = await new HttpClient().PostAsync(
+            var responseCreate = new HttpClient().Post(
                 $"{Utils.BaseUri}notes?user_id={_user.Id}",
                 new JsonContent("{ \"title\": \"Title\", \"content\": \"Content\" }"));
             Assert.Equal(HttpStatusCode.Created, responseCreate.StatusCode);
             var jsonCreate = await responseCreate.Content.ReadAsStringAsync();
             var noteCreate = JsonConvert.DeserializeObject<Note>(jsonCreate);
             Assert.True(noteCreate.Id >= 0);
-
-            var responseGet = await new HttpClient().GetAsync($"{Utils.BaseUri}notes/{noteCreate.Id}");
-            var noteGet = responseGet.Content.DeserializeJson<Note>();
         }
 
         [Fact]
