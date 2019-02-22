@@ -55,9 +55,9 @@ namespace MdNotes.Tests
         [Fact]
         public void InvalidBodyGives400()
         {
-            var request = new HttpRequestMessage(HttpMethod.Put, $"{Utils.BaseUri}users/9999");
+            var request = new HttpRequestMessage(HttpMethod.Put, $"{Utils.BaseUri}users/{_userKey.User.Id}");
             request.Headers.Add("Authorization", $"Bearer {_userKey.DefaultKey}");
-            request.Content = new JsonContent("{{ \"name\": \"test\" }}");
+            request.Content = new JsonContent("");
 
             var response = new HttpClient().Send(request);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
