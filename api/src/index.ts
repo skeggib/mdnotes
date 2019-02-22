@@ -124,81 +124,84 @@ app.delete('/users/:id', authorizationMiddleware, (request, response) => {
  * Updates an user by ID.
  */
 app.put('/users/:id', (request, response) => {
-    if (request.params.id != response.locals.userId) {
-        response.status(401).end();
-        return;
-    }
-    if (request.body.name == null) {
-        response.status(400).json({ "error": "Invalid request body content." });
-        return;
-    }
+    User.findById(request.params.id).then(user => {
+        if (user == null) {
+            response.status(404).end();
+            return;
+        }
 
-    User.update(request.body, {
-        where: { id: request.params.id }
-    }).then(result => {
-        var count = result[0];
-        if (count > 0)
-            response.end();
-        else
-            response.status(404).json({ "error": "Not found" });
-    }).catch(error => {
-        response.status(500).json({ "error": error });
+        if (request.params.id != response.locals.userId) {
+            response.status(401).end();
+            return;
+        }
+        if (request.body.name == null) {
+            response.status(400).json({ "error": "Invalid request body content." });
+            return;
+        }
+    
+        User.update(request.body, {
+            where: { id: request.params.id }
+        }).then(result => {
+            response.json(result);
+        }).catch(error => {
+            response.status(500).json({ "error": error });
+        });
     });
 });
 
 /**
  * Returns all notes of the user.
  */
-app.get('/notes', function (req, res) {
-    if (req.params.id != res.locals.userId) {
-        res.status(401).end();
+app.get('/notes', (request, response) => {
+    if (request.params.id != response.locals.userId) {
+        response.status(401).end();
         return;
     }
 
-    Note.findAll({ where: { owner: res.locals.userId } }).then(function (value) {
+    Note.findAll({ where: { owner: response.locals.userId } }).then(function (value) {
         let result = [];
         for (let val of value) {
             result.push(val);
         }
-        res.status(200).json(result);
+        response.status(200).json(result);
     }).catch(error => {
-        res.status(500).json({ "error": error });
+        response.status(500).json({ "error": error });
     });
 });
 
 /**
  * Gets a note.
  */
-app.get('/notes/:id', function (req, res) {
-    Note.findById(req.params.id).then((note:any) => {
+app.get('/notes/:id', (request, response) => {
+    Note.findById(request.params.id).then((note:any) => {
         if (note != null) {
-            if (note.owner != res.locals.userId)
-                res.status(401).end();
+            if (note.owner != response.locals.userId)
+                response.status(401).end();
             else
-                res.status(200).json(note);
+                response.status(200).json(note);
         }
         else
-            res.status(404).end();
+            response.status(404).end();
     }).catch(error => {
-        res.status(500).json({ "error": error });
+        response.status(500).json({ "error": error });
     });
 });
 
 /**
  * Gets a rendered note.
  */
-app.get('/notes/:id/html', function (req, res) {
-    Note.findById(req.params.id).then((note: any) => {
+app.get('/notes/:id/html', (request, response) => {
+    Note.findById(request.params.id).then((note: any) => {
         if (note != null) {
-            if (note.owner != res.locals.userId)
-                res.status(401).end();
+            if (note.owner != response.locals.userId)
+                response.status(401).end();
             else {
                 var html = md.render(note.content);
-                res.status(200).send(html);
+                response.status(200).send(html);
             }
             
         } else {
-            res.status(404).json({ "error": "Not found" });
+            response.status(404).json({ "error": "Not found" });
         }
     });
 });
@@ -206,65 +209,70 @@ app.get('/notes/:id/html', function (req, res) {
 /**
  * Creates a note.
  */
-app.post('/notes', function (req, res) {
-    if (req.body.title == null || req.body.content == null) {
-        res.status(400).json({ "error": "Invalid request body content. "});
+app.post('/notes', (request, response) => {
+    if (response.locals.userId == null) {
+        response.status(401).end();
+        return;
+    }
+
+    if (request.body.title == null || request.body.content == null) {
+        response.status(400).json({ "error": "Invalid request body content. "});
         return;
     }
     
-    User.findById(res.locals.userId).then(user => {
+    User.findById(response.locals.userId).then(user => {
         Note.create({
-            title: req.body.title,
-            content: req.body.content,
-            owner: res.locals.userId
+            title: request.body.title,
+            content: request.body.content,
+            owner: response.locals.userId
         }).then(function (noteNew) {
-            res.status(201).json(noteNew).end();
+            response.status(201).json(noteNew).end();
         }).catch(function (error) {
-            res.status(500).json({ "error": error });
+            response.status(500).json({ "error": error });
         });
     }).catch(error => {
-        res.status(500).json({ "error": error });
+        response.status(500).json({ "error": error });
     });
 });
 
 /**
  * Updates a note.
  */
-app.put('/notes/:id', function (req, res) {
-    Note.findById(req.params.id).then((note: any) => {
+app.put('/notes/:id', (request, response) => {
+    Note.findById(request.params.id).then((note: any) => {
         if (note != null) {
-            if (note.owner == res.locals.userId) {
-                note.title = req.body.title;
-                note.content = req.body.content;
+            if (note.owner == response.locals.userId) {
+                note.title = request.body.title;
+                note.content = request.body.content;
                 note.save().then(updatedNote => {
-                    res.status(200).json(updatedNote);
+                    response.status(200).json(updatedNote);
                 });
             } else {
-                res.status(401).end();
+                response.status(401).end();
             }
         } else {
-            res.status(404).json({ "error": "Not found" });
+            response.status(404).json({ "error": "Not found" });
         }
     }).catch(error => {
-        res.status(500).json({ "error": error });
+        response.status(500).json({ "error": error });
     });
 });
 
 /**
  * Deletes a note.
  */
-app.delete('/notes/:id', function (req, res) {
-    Note.findById(req.params.id).then((note: any) => {
+app.delete('/notes/:id', (request, response) => {
+    Note.findById(request.params.id).then((note: any) => {
         if (note != null) {
-            if (note.owner == res.locals.userId) {
+            if (note.owner == response.locals.userId) {
                 note.destroy().then(function () {
-                    res.status(200).end();
+                    response.status(200).end();
                 });
             } else {
-                res.status(401).end();
+                response.status(401).end();
             }
         } else {
-            res.status(404).json({ "error": "Not found" });
+            response.status(404).json({ "error": "Not found" });
         }
     });
 });

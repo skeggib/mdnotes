@@ -68,19 +68,14 @@ namespace MdNotes.Tests
         public void UpdatingWhithoutRightKey401()
         {
             var nameOther = Utils.GetUniqueString();
-            var postTask = new HttpClient().PostAsync(
+            var response = new HttpClient().Post(
                 $"{Utils.BaseUri}users", 
                 new JsonContent($"{{\"name\": \"{nameOther}\"}}"));
-            postTask.Wait();
-            var response = postTask.Result;
-            var readTask = response.Content.ReadAsStringAsync();
-            readTask.Wait();
-            var json = readTask.Result;
-            var _userKeyOther = JsonConvert.DeserializeObject<UserKey>(json);
+            var userKeyOther = response.Content.DeserializeJson<UserKey>();
 
             var request = new HttpRequestMessage(HttpMethod.Put, $"{Utils.BaseUri}users/{_userKey.User.Id}");
-            request.Headers.Add("Authorization", $"Bearer {_userKeyOther.DefaultKey}");
-            request.Content = new JsonContent("{{ \"name\": \"test\" }}");
+            request.Headers.Add("Authorization", $"Bearer {userKeyOther.DefaultKey}");
+            request.Content = new JsonContent("{ \"name\": \"test\" }");
 
             var putResponse = new HttpClient().Send(request);
             Assert.Equal(HttpStatusCode.Unauthorized, putResponse.StatusCode);
