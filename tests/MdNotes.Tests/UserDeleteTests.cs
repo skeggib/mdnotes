@@ -13,14 +13,19 @@ namespace MdNotes.Tests
         public async Task CanDeleteUser()
         {
             var name = Utils.GetUniqueString();
-            var response = await new HttpClient().PostAsync(
+            var responseDelete = new HttpClient().Post(
                 $"{Utils.BaseUri}users",
                 new JsonContent($"{{\"name\": \"{name}\"}}"));
-            var json = await response.Content.ReadAsStringAsync();
-            var user = JsonConvert.DeserializeObject<User>(json);
+            var json = await responseDelete.Content.ReadAsStringAsync();
+            var userKey = JsonConvert.DeserializeObject<UserKey>(json);
 
-            var deleteResponse = await new HttpClient().DeleteAsync($"{Utils.BaseUri}users/{user.Id}");
-            Assert.Equal(HttpStatusCode.OK, deleteResponse.StatusCode);
+            var request = new HttpRequestMessage(HttpMethod.Delete, $"{Utils.BaseUri}users/{userKey.User.Id}");
+            request.Headers.Add("Authorization", $"Bearer {userKey.DefaultKey}");
+            var response = new HttpClient().Send(request);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var responseGet = new HttpClient().Get($"{Utils.BaseUri}users/{userKey.User.Id}");
+            Assert.Equal(HttpStatusCode.NotFound, responseGet.StatusCode);
         }
 
         [Fact]

@@ -14,7 +14,7 @@ namespace MdNotes.Tests
         public async Task CanCreateUser()
         {
             var name = Utils.GetUniqueString();
-            var response = await new HttpClient().PostAsync(
+            var response = new HttpClient().Post(
                 $"{Utils.BaseUri}users", 
                 new JsonContent($"{{\"name\": \"{name}\"}}"));
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);

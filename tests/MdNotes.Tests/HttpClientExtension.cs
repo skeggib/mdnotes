@@ -34,5 +34,12 @@ namespace MdNotes.Tests
             task.Wait();
             return task.Result;
         }
+
+        public static HttpResponseMessage Send(this HttpClient client, HttpRequestMessage request)
+        {
+            var task = client.SendAsync(request);
+            task.Wait();
+            return task.Result;
+        }
     }
 }
