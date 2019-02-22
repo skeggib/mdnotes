@@ -43,36 +43,47 @@ namespace MdNotes.Tests
             Assert.Equal(newName, userGet.Name);
         }
 
-        // [Fact]
-        // public async Task UpdatingNonExistingUserGives404()
-        // {
-        //     var request = new HttpRequestMessage(HttpMethod.Put, $"{Utils.BaseUri}users/9999");
-        //     request.Headers.Add("Authorization", $"Bearer {_userKey.DefaultKey}");
-        //     request.Content = new JsonContent("{{ \"name\": \"test\" }}");
+        [Fact]
+        public async Task UpdatingNonExistingUserGives404()
+        {
+            var response = await new HttpClient().PutAsync(
+                $"{Utils.BaseUri}users/9999",
+                new JsonContent($"{{ \"name\": \"test\" }}"));
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
 
-        //     var response = await new HttpClient().PutAsync(
-        //         $"{Utils.BaseUri}users/9999",
-        //         new JsonContent($"{{ \"name\": \"test\" }}"));
-        //     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        // }
+        [Fact]
+        public void InvalidBodyGives400()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Put, $"{Utils.BaseUri}users/9999");
+            request.Headers.Add("Authorization", $"Bearer {_userKey.DefaultKey}");
+            request.Content = new JsonContent("{{ \"name\": \"test\" }}");
+
+            var response = new HttpClient().Send(request);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
 
 
-        // [Fact]
-        // public async Task UpdatingWhithoutKey401()
-        // {
-        //     var response = await new HttpClient().PutAsync(
-        //         $"{Utils.BaseUri}users/9999",
-        //         new JsonContent($"{{ \"name\": \"test\" }}"));
-        //     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        // }
+        [Fact]
+        public void UpdatingWhithoutRightKey401()
+        {
+            var nameOther = Utils.GetUniqueString();
+            var postTask = new HttpClient().PostAsync(
+                $"{Utils.BaseUri}users", 
+                new JsonContent($"{{\"name\": \"{nameOther}\"}}"));
+            postTask.Wait();
+            var response = postTask.Result;
+            var readTask = response.Content.ReadAsStringAsync();
+            readTask.Wait();
+            var json = readTask.Result;
+            var _userKeyOther = JsonConvert.DeserializeObject<UserKey>(json);
 
-        // [Fact]
-        // public async Task InvalidBodyGives400()
-        // {
-        //     var putResponse = await new HttpClient().PutAsync(
-        //         $"{Utils.BaseUri}users/{_userKey.User.Id}",
-        //         new JsonContent($"{{ \"invalid\": \"test\" }}"));
-        //     Assert.Equal(HttpStatusCode.BadRequest, putResponse.StatusCode);
-        // }
+            var request = new HttpRequestMessage(HttpMethod.Put, $"{Utils.BaseUri}users/{_userKey.User.Id}");
+            request.Headers.Add("Authorization", $"Bearer {_userKeyOther.DefaultKey}");
+            request.Content = new JsonContent("{{ \"name\": \"test\" }}");
+
+            var putResponse = new HttpClient().Send(request);
+            Assert.Equal(HttpStatusCode.Unauthorized, putResponse.StatusCode);
+        }
     }
 }
