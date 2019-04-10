@@ -8,7 +8,7 @@ import bearerToken from 'express-bearer-token';
 
 import MarkdownIt from 'markdown-it';
 import MarkdownItMath from 'markdown-it-math';
-import { Authorization } from './Authorization';
+import Authorization from './Authorization';
 
 const md = MarkdownIt();
 md.use(MarkdownItMath);
